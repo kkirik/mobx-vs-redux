@@ -1,32 +1,28 @@
 import express from 'express';
 import React from 'react';
 import {renderToString} from 'react-dom/server';
-import App from './App';
 import template from './template';
-import {initStore, Store} from './redux/store';
-import {Provider} from 'react-redux';
+import {Provider} from 'mobx-react';
+import {getSnapshot, onSnapshot} from 'mobx-state-tree';
+
+import App from './App';
+import {initStore} from './mobx/models/Root';
 
 const server = express();
 
 server.use('/assets', express.static('assets'));
 
-server.get('/', (req, res) => {
-  const initialState: Store = {
-    user: {
-      name: 'server',
-      id: 'server',
-      email: 'server@server.com',
-    },
-    orders: [],
-  };
-  const store = initStore(initialState);
+const store = initStore(true);
 
+onSnapshot(store, snapshot => console.log('Snapshot: ', snapshot));
+
+server.get('/', (req, res) => {
   console.log('🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥');
-  console.log('server', store.getState());
+  console.log('server', store);
   console.log('🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥');
 
   const appString = renderToString(
-    <Provider store={store}>
+    <Provider {...store}>
       <App />
     </Provider>
   );
@@ -35,7 +31,7 @@ server.get('/', (req, res) => {
     template({
       body: appString,
       title: 'Hello World from the server',
-      initialState: JSON.stringify(initialState),
+      initialState: JSON.stringify(getSnapshot(store)),
     })
   );
 });

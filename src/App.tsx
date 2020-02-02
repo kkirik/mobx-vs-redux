@@ -2,7 +2,7 @@ import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 
 import React from 'react';
-import TestComponent from './redux/TestComponent';
+import {TestComponent} from './mobx/TestComponent';
 
 function App() {
   return (
